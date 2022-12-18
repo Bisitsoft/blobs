@@ -29,12 +29,14 @@ flags=\
 # <<< Compiler <<<
 
 # >>> Target And Object Files >>>
-all-target=$(example-target) $(shared-target)
-dist-files=$(shared-target) $(example-target)
-cache-files=$(example-obj) $(shared-obj)
+all-files=$(dist-files) $(cache-files)
+dist-files=$(shared-target) $(example-win-target) $(example-lnx-target)
+cache-files=$(example-win-obj) $(example-lnx-obj) $(shared-obj)
 
-example-target=cslprgbar
-example-obj=ConsoleProgressBar.Example.o
+example-win-target=cslprgbar-win
+example-win-obj=ConsoleProgressBar.Example.win.o
+example-lnx-target=cslprgbar-lnx
+example-lnx-obj=ConsoleProgressBar.Example.lnx.o
 
 shared-target=libcslprgbar.so
 shared-obj=$(lib-obj)
@@ -43,44 +45,47 @@ lib-obj=ConsoleProgressBar.o
 # <<< Target And Object Files <<<
 
 # >>> Makes >>>
-all: $(all-target)
-
-example: $(example-target)
+example-windows: cslprgbar-win
+example-linux: cslprgbar-lnx
 shared-library: $(shared-target)
 # <<< Makes <<<
 
 # >>> Dependencies >>>
-#	Example Targets:
-cslprgbar: $(shared-target) $(example-obj)
-#	export LD_LIBRARY_PATH=$(PWD):$(LD_LIBRARY_PATH)
-	make install-shared-cslprgbar
+#	Example:
+cslprgbar-win: $(example-win-obj)
+	make install-shared-libcslprgbar
 	$(CC) $(flags) -L/usr/lib/ -lcslprgbar -o $@ $(example-obj)
-ConsoleProgressBar.Example.o: ConsoleProgressBar.Example.c
-	$(CC) $(flags) -c $< -o $@
+cslprgbar-lnx: $(example-lnx-obj)
+	make install-shared-libcslprgbar
+	$(CC) $(flags) -L/usr/lib/ -lcslprgbar -o $@ $(example-obj)
+ConsoleProgressBar.Example.win.o: ConsoleProgressBar.Example.c
+	$(CC) $(flags) -D__WINDOWS__ -c $< -o $@
+ConsoleProgressBar.Example.lnx.o: ConsoleProgressBar.Example.c
+	$(CC) $(flags) -D__linux__ -c $< -o $@
 
-#   Libraries Targets:
+#   Libraries:
 libcslprgbar.so: $(shared-obj)
 	$(CC) $(flags) -shared -fPIC -o $@ $^
-
-#   Libraries Objects:
 ConsoleProgressBar.o: ConsoleProgressBar.c
-	$(CC) $(flags) -c $< -o $@
+	$(CC) $(flags) -fPIC -c $< -o $@
 # <<< Dependencies <<<
 
 # >>> Install >>>
 lib-dir=/usr/lib
 
-install-shared-cslprgbar:
+install-shared-libcslprgbar:
 	make shared-library
 	mkdir -p $(lib-dir)
 	cp $(shared-target) $(lib-dir)/
 
-uninstall-shared-cslprgbar:
+uninstall-shared-libcslprgbar:
 	rm $(lib-dir)/$(shared-target)
 # <<< Install <<<
 
 # >>> Clean >>>
 clean:
+	rm -f $(all-files)
+clean-cache:
 	rm -f $(cache-files)
 clean-dist:
 	rm -f $(dist-files)
