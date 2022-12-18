@@ -1,2 +1,4 @@
 *.o
-libcslprgbar.so
+./libcslprgbar.so
+./cslprgbar-windows
+./cslprgbar-linux
