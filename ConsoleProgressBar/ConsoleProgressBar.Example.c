@@ -6,14 +6,7 @@ Author: Orange233 (https://github.com/Orange23333)
 #include <stdio.h>
 #include <stdbool.h>
 
-#if defined(__linux__) || defined(__gnu_linux__)
-	#include <unistd.h>
-#elif defined(__WINDOWS__) || defined(_WIN64) || defined(_WIN32) || defined(__WIN32__)
-	#include <windows.h>
-#else
-	#error No or Non-supported predef.
-#endif
-
+#include <unistd.h>
 
 #include "ConsoleProgressBar.h"
 
@@ -29,11 +22,7 @@ int main(){
 		PrintRollingChars(&prcCache, true);
 		PrintSameChar('\b', r);
 		
-#if defined(__linux__) || defined(__gnu_linux__)
 		usleep(100*1000);
-#elif defined(__WINDOWS__) || defined(_WIN64) || defined(_WIN32) || defined(__WIN32__)
-		Sleep(100);
-#endif
 	}
 	PrintProgress(20, 2, 1.0f, false);
 	printf("Finished!\n");
