@@ -7,7 +7,7 @@ Author: Orange233 (https://github.com/Orange23333)
 #include <stdbool.h>
 
 #if defined(__linux__) || defined(__gnu_linux__)
-	#include <unistd.h.h>
+	#include <unistd.h>
 #elif defined(__WINDOWS__) || defined(_WIN64) || defined(_WIN32) || defined(__WIN32__)
 	#include <windows.h>
 #else

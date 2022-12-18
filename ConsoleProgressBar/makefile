@@ -8,7 +8,8 @@ CC=gcc
 #   C Compiler Flags:
 flags=\
 	-finput-charset=UTF-8\
-	-std=c17\
+	-std=gnu17\
+#	-std=c17\
 #	-v\
 #	-g\
 #	-Wfatal-errors \
@@ -54,10 +55,10 @@ shared-library: $(shared-target)
 #	Example:
 cslprgbar-win: $(example-win-obj)
 	make install-shared-libcslprgbar
-	$(CC) $(flags) -L/usr/lib/ -lcslprgbar -o $@ $(example-obj)
+	$(CC) $(flags) -L/usr/lib/ -lcslprgbar -o $@ $(example-win-obj)
 cslprgbar-lnx: $(example-lnx-obj)
 	make install-shared-libcslprgbar
-	$(CC) $(flags) -L/usr/lib/ -lcslprgbar -o $@ $(example-obj)
+	$(CC) $(flags) -L/usr/lib/ -lcslprgbar -o $@ $(example-lnx-obj)
 ConsoleProgressBar.Example.win.o: ConsoleProgressBar.Example.c
 	$(CC) $(flags) -D__WINDOWS__ -c $< -o $@
 ConsoleProgressBar.Example.lnx.o: ConsoleProgressBar.Example.c
@@ -72,14 +73,16 @@ ConsoleProgressBar.o: ConsoleProgressBar.c
 
 # >>> Install >>>
 lib-dir=/usr/lib
+include-dir=/usr/include
 
 install-shared-libcslprgbar:
 	make shared-library
-	mkdir -p $(lib-dir)
 	cp $(shared-target) $(lib-dir)/
+	cp ConsoleProgressBar.h $(include-dir)
 
 uninstall-shared-libcslprgbar:
 	rm $(lib-dir)/$(shared-target)
+	rm $(include-dir)/ConsoleProgressBar.h
 # <<< Install <<<
 
 # >>> Clean >>>
