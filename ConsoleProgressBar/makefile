@@ -31,44 +31,51 @@ flags=\
 
 # >>> Target And Object Files >>>
 all-files=$(dist-files) $(cache-files)
-dist-files=$(shared-target) $(example-win-target) $(example-lnx-target)
-cache-files=$(example-win-obj) $(example-lnx-obj) $(shared-obj)
+dist-files=$(shared-target) $(static-target) $(example-win-target) $(example-lnx-target)
+cache-files=$(example-win-obj) $(example-lnx-obj) $(shared-obj) $(static-obj)
 
-example-win-target=cslprgbar-win
+export-include-files=ConsoleProgressBar.h
+
+example-win-target=cslprgbar-win.exe
 example-win-obj=ConsoleProgressBar.Example.win.o
 example-lnx-target=cslprgbar-lnx
 example-lnx-obj=ConsoleProgressBar.Example.lnx.o
 
 shared-target=libcslprgbar.so
-shared-obj=$(lib-obj)
-
-lib-obj=ConsoleProgressBar.o
+shared-obj=ConsoleProgressBar.shared.o
+static-target=libcslprgbar.a
+static-obj=ConsoleProgressBar.static.o
 # <<< Target And Object Files <<<
 
 # >>> Makes >>>
-example-windows: cslprgbar-win
-example-linux: cslprgbar-lnx
+example-windows: $(example-win-target)
+example-linux: $(example-lnx-target)
 shared-library: $(shared-target)
+static-library: $(static-target)
 # <<< Makes <<<
 
 # >>> Dependencies >>>
 #	Example:
-cslprgbar-win: $(example-win-obj)
-	make install-shared-libcslprgbar
+cslprgbar-win.exe: $(example-win-obj)
 	$(CC) $(flags) -L/usr/lib/ -lcslprgbar -o $@ $(example-win-obj)
 cslprgbar-lnx: $(example-lnx-obj)
-	make install-shared-libcslprgbar
 	$(CC) $(flags) -L/usr/lib/ -lcslprgbar -o $@ $(example-lnx-obj)
 ConsoleProgressBar.Example.win.o: ConsoleProgressBar.Example.c
-	$(CC) $(flags) -D__WINDOWS__ -c $< -o $@
+	make install-static-libcslprgbar
+	$(CC) $(flags) -D__WINDOWS__ $(lib-dir)/$(static-target) -c $< -o $@
 ConsoleProgressBar.Example.lnx.o: ConsoleProgressBar.Example.c
+	make install-shared-libcslprgbar
 	$(CC) $(flags) -D__linux__ -c $< -o $@
 
 #   Libraries:
 libcslprgbar.so: $(shared-obj)
 	$(CC) $(flags) -shared -fPIC -o $@ $^
-ConsoleProgressBar.o: ConsoleProgressBar.c
+libcslprgbar.a: $(static-obj)
+	ar -rcs $@ $^
+ConsoleProgressBar.shared.o: ConsoleProgressBar.c
 	$(CC) $(flags) -fPIC -c $< -o $@
+ConsoleProgressBar.static.o: ConsoleProgressBar.c
+	$(CC) $(flags) -c $< -o $@
 # <<< Dependencies <<<
 
 # >>> Install >>>
@@ -78,11 +85,18 @@ include-dir=/usr/include
 install-shared-libcslprgbar:
 	make shared-library
 	cp $(shared-target) $(lib-dir)/
-	cp ConsoleProgressBar.h $(include-dir)
-
+	cp $(export-include-files) $(include-dir)
 uninstall-shared-libcslprgbar:
 	rm $(lib-dir)/$(shared-target)
-	rm $(include-dir)/ConsoleProgressBar.h
+	rm $(include-dir)/$(export-include-files)
+
+install-static-libcslprgbar:
+	make static-library
+	cp $(static-target) $(lib-dir)/
+	cp $(export-include-files) $(include-dir)
+uninstall-static-libcslprgbar:
+	rm $(lib-dir)/$(static-target)
+	rm $(include-dir)/$(export-include-files)
 # <<< Install <<<
 
 # >>> Clean >>>
